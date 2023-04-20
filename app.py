@@ -13,37 +13,31 @@ df = pd.read_csv(Path(__file__).parent / "penguins.csv", na_values="NA")
 numeric_cols = df.select_dtypes(include=["float64"]).columns.tolist()
 species = df["Species"].unique().tolist()
 
-app_ui = bslib.bind_fill_role(
-    ui.page_bootstrap(
-        {"class": "p-3 bslib-page-fill html-fill-container"},
-        # shinyswatch.theme.minty(),
-        ui.tags.style("html, body { height: 100%; }"),
-        layout_sidebar(
-            sidebar(
-                ui.input_selectize(
-                    "xvar",
-                    "X variable",
-                    numeric_cols,
-                    selected="Bill Length (mm)",
-                ),
-                ui.input_selectize(
-                    "yvar",
-                    "Y variable",
-                    numeric_cols,
-                    selected="Bill Depth (mm)",
-                ),
-                ui.input_checkbox_group(
-                    "species", "Filter by species", species, selected=species
-                ),
-                ui.hr(),
-                ui.input_switch("by_species", "Show species", value=True),
-                ui.input_switch("show_margins", "Show marginal plots", value=True),
+app_ui = bslib.page_fillable(
+    layout_sidebar(
+        sidebar(
+            ui.input_selectize(
+                "xvar",
+                "X variable",
+                numeric_cols,
+                selected="Bill Length (mm)",
             ),
-            ui.output_plot("scatter", height="100%"),
-            fill=True,
+            ui.input_selectize(
+                "yvar",
+                "Y variable",
+                numeric_cols,
+                selected="Bill Depth (mm)",
+            ),
+            ui.input_checkbox_group(
+                "species", "Filter by species", species, selected=species
+            ),
+            ui.hr(),
+            ui.input_switch("by_species", "Show species", value=True),
+            ui.input_switch("show_margins", "Show marginal plots", value=True),
         ),
+        ui.output_plot("scatter", height="100%"),
+        fill=True,
     ),
-    container=True,
 )
 
 

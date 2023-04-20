@@ -2,6 +2,7 @@ from typing import Union, Literal, Optional
 import random
 from htmltools import tags, div, css, TagChild, TagAttrs, Tag, HTMLDependency
 import numbers
+from shiny import ui
 
 
 class Sidebar:
@@ -177,6 +178,7 @@ def trinary(x: Optional[bool]) -> Union[None, str]:
     else:
         return "false"
 
+
 def bind_fill_role(
     tag: Tag, *, item: Optional[bool] = None, container: Optional[bool] = None
 ) -> Tag:
@@ -256,8 +258,10 @@ def fill_dependencies():
         stylesheet={"href": "fill.css"},
     )
 
+
 def classes(*args: Optional[str]) -> Optional[str]:
     return " ".join([x for x in args if x is not None])
+
 
 def validate_css_unit(value: Union[None, numbers.Number, str]) -> Union[None, str]:
     # TODO: Actually validate. Or don't validate, but then change
@@ -266,3 +270,29 @@ def validate_css_unit(value: Union[None, numbers.Number, str]) -> Union[None, st
         return "{:f}px".format(value)
     else:
         return value
+
+
+def page_fillable(
+    *args: TagChild | TagAttrs,
+    padding=None,
+    gap=None,
+    fill_mobile=False,
+    title=None,
+    lang=None,
+):
+    style = css(
+        # TODO: validate_css_padding(padding)
+        padding=validate_css_unit(padding),
+        gap=validate_css_unit(gap),
+        __bslib_page_fill_mobile_height="100%" if fill_mobile else "auto",
+    )
+
+    return ui.page_bootstrap(
+        tags.head(tags.style("html { height: 100%; }")),
+        bind_fill_role(
+            tags.body(class_="bslib-page-fill", style=style, *args),
+            container=True,
+        ),
+        title=title,
+        lang=lang,
+    )

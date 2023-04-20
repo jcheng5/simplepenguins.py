@@ -137,6 +137,11 @@ def layout_sidebar(
         "250px" if height is None else "50%"
     )
 
+    # div(child, attrname=value)
+    # div({"attrname": "value"}, child)
+    # div(dict(attrname=value), child)
+    # div(attrname=value, .children=[child])
+
     res = div(
         sidebar_dependency(),
         sidebar_js_init(),
@@ -148,11 +153,10 @@ def layout_sidebar(
         data_bslib_sidebar_border=trinary(border),
         data_bslib_sidebar_border_radius=trinary(border_radius),
         style=css(
-            __bslib_sidebar_width=sidebar.width,
+            __bslib_sidebar_width=validate_css_unit(sidebar.width),
             __bs_card_border_color=border_color,
-            # TODO: validateCssUnit(height)
-            height=height,
-            __bslib_sidebar_max_height_mobile=max_height_mobile,
+            height=validate_css_unit(height),
+            __bslib_sidebar_max_height_mobile=validate_css_unit(max_height_mobile),
         ),
     )
 
@@ -172,7 +176,6 @@ def trinary(x: Optional[bool]) -> Union[None, str]:
         return "true"
     else:
         return "false"
-
 
 def bind_fill_role(
     tag: Tag, *, item: Optional[bool] = None, container: Optional[bool] = None
@@ -252,3 +255,14 @@ def fill_dependencies():
         source={"package": "bslib", "subdir": "htmltools/"},
         stylesheet={"href": "fill.css"},
     )
+
+def classes(*args: Optional[str]) -> Optional[str]:
+    return " ".join([x for x in args if x is not None])
+
+def validate_css_unit(value: Union[None, numbers.Number, str]) -> Union[None, str]:
+    # TODO: Actually validate. Or don't validate, but then change
+    # the function name to to_css_unit() or something.
+    if isinstance(value, numbers.Number):
+        return "{:f}px".format(value)
+    else:
+        return value

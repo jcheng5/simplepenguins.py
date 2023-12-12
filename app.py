@@ -26,6 +26,7 @@ app_ui = ui.page_sidebar(
         ui.hr(),
         ui.input_switch("by_species", "Show species", value=True),
         ui.input_switch("show_margins", "Show marginal plots", value=True),
+        open=True,
     ),
     ui.card(
         ui.output_plot("scatter"),

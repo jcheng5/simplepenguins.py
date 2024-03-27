@@ -22,24 +22,6 @@ with ui.sidebar():
     ui.input_switch("by_species", "Show species", value=True)
     ui.input_switch("show_margins", "Show marginal plots", value=True)
 
-with ui.card():
-
-    @render.plot
-    def scatter():
-        """Generates a plot for Shiny to display to the user"""
-
-        # The plotting function to use depends on whether margins are desired
-        plotfunc = sns.jointplot if input.show_margins() else sns.scatterplot
-
-        plotfunc(
-            data=filtered_df(),
-            x=input.xvar(),
-            y=input.yvar(),
-            hue="Species" if input.by_species() else None,
-            hue_order=species,
-            legend=False,
-        )
-
 
 @reactive.Calc
 def filtered_df() -> pd.DataFrame:
@@ -47,3 +29,20 @@ def filtered_df() -> pd.DataFrame:
 
     # Filter the rows so we only include the desired species
     return df[df["Species"].isin(input.species())]
+
+
+@render.plot
+def scatter():
+    """Generates a plot for Shiny to display to the user"""
+
+    # The plotting function to use depends on whether margins are desired
+    plotfunc = sns.jointplot if input.show_margins() else sns.scatterplot
+
+    plotfunc(
+        data=filtered_df(),
+        x=input.xvar(),
+        y=input.yvar(),
+        hue="Species" if input.by_species() else None,
+        hue_order=species,
+        legend=False,
+    )

@@ -3,49 +3,27 @@ from pathlib import Path
 import pandas as pd
 import seaborn as sns
 
-from shiny import App, Inputs, Outputs, Session, reactive, render, req, ui
+from shiny import reactive
+from shiny.express import input, render, ui
 
 sns.set_theme()
+ui.page_opts(fillable=True, title="Penguin Scatterplot")
 
 df = pd.read_csv(Path(__file__).parent / "penguins.csv", na_values="NA")
 numeric_cols = df.select_dtypes(include=["float64"]).columns.tolist()
 species = df["Species"].unique().tolist()
 species.sort()
 
-app_ui = ui.page_sidebar(
-    ui.sidebar(
-        ui.input_selectize(
-            "xvar", "X variable", numeric_cols, selected="Bill Length (mm)"
-        ),
-        ui.input_selectize(
-            "yvar", "Y variable", numeric_cols, selected="Bill Depth (mm)"
-        ),
-        ui.input_checkbox_group(
-            "species", "Filter by species", species, selected=species
-        ),
-        ui.hr(),
-        ui.input_switch("by_species", "Show species", value=True),
-        ui.input_switch("show_margins", "Show marginal plots", value=True),
-        open=True,
-    ),
-    ui.card(
-        ui.output_plot("scatter"),
-    ),
-)
+with ui.sidebar():
+    ui.input_selectize("xvar", "X variable", numeric_cols, selected="Bill Length (mm)")
+    ui.input_selectize("yvar", "Y variable", numeric_cols, selected="Bill Depth (mm)")
+    ui.input_checkbox_group("species", "Filter by species", species, selected=species)
+    ui.hr()
+    ui.input_switch("by_species", "Show species", value=True)
+    ui.input_switch("show_margins", "Show marginal plots", value=True)
 
+with ui.card():
 
-def server(input: Inputs, output: Outputs, session: Session):
-    @reactive.Calc
-    def filtered_df() -> pd.DataFrame:
-        """Returns a Pandas data frame that includes only the desired rows"""
-
-        # This calculation "req"uires that at least one species is selected
-        req(len(input.species()) > 0)
-
-        # Filter the rows so we only include the desired species
-        return df[df["Species"].isin(input.species())]
-
-    @output
     @render.plot
     def scatter():
         """Generates a plot for Shiny to display to the user"""
@@ -63,4 +41,9 @@ def server(input: Inputs, output: Outputs, session: Session):
         )
 
 
-app = App(app_ui, server)
+@reactive.Calc
+def filtered_df() -> pd.DataFrame:
+    """Returns a Pandas data frame that includes only the desired rows"""
+
+    # Filter the rows so we only include the desired species
+    return df[df["Species"].isin(input.species())]
